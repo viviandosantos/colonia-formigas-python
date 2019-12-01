@@ -25,13 +25,11 @@ class Formiga(object):
         self.Arestas = arestas
     
     def start(self):
-        #print("\tFormiga #%d andando a partir do ponto: %d-%d" % (self.IdFormiga, self.PontoAtual.Valor, self.PontoAtual.Tipo))
         caminhoEscolhido = self.escolherCaminho()
         self.caminharAteDestino(caminhoEscolhido)
         if 0 <= (len(self.Tour)) < 4 and self.PontoAtual.Tipo != 5:
             self.start()
         else:
-            #print("\tFormiga #%d chegou ao ponto: %d-%d" % (self.IdFormiga, self.PontoAtual.Valor, self.PontoAtual.Tipo))
             self.reset()
     
     def andar(self):
@@ -39,7 +37,6 @@ class Formiga(object):
         if 0 <= (len(self.Tour)) < 4 and self.PontoAtual.Tipo != 5:
             self.start()
         else:
-            #print("\tFormiga #%d chegou ao ponto: %d-%d" % (self.IdFormiga, self.PontoAtual.Valor, self.PontoAtual.Tipo))
             self.reset()
     
     def caminharAteDestino(self, caminho):
@@ -56,8 +53,8 @@ class Formiga(object):
         self.Visitas.append(self.PontoAtual)
 
     def escolherCaminho(self):
-        #calcular probabilidade de transição e escolher a maior
         escolhido = self.roleta()
+        #escolhido = self.obterCaminhoMaisProvavel()
         return escolhido
 
     def roleta(self):
@@ -65,14 +62,23 @@ class Formiga(object):
         arestasTipo = list(filter(lambda x: x.PontoOrigem.Tipo == self.PontoAtual.Tipo and x.PontoOrigem.Valor == self.PontoAtual.Valor
                                     and x.PontoDestino != self.PontoAtual, self.Arestas))
         count = 0
-        maxProb = sum(a.Probabilidade for a in arestasTipo)
+        maxProb = sum(a.ProbabilidadeTransicao for a in arestasTipo)
         escolhida = arestasTipo[0]
         prob = random.uniform(0, maxProb)
 
         for a in arestasTipo:
             aux = count
-            count += a.Probabilidade
+            count += a.ProbabilidadeTransicao
             if aux < prob <= count:
+                escolhida = a
+        return escolhida
+
+    def obterCaminhoMaisProvavel(self):
+        arestasTipo = list(filter(lambda x: x.PontoOrigem.Tipo == self.PontoAtual.Tipo and x.PontoOrigem.Valor == self.PontoAtual.Valor
+                                    and x.PontoDestino != self.PontoAtual, self.Arestas))
+        escolhida = arestasTipo[0]
+        for a in arestasTipo:
+            if a.ProbabilidadeTransicao > escolhida.ProbabilidadeTransicao:
                 escolhida = a
         return escolhida
 
@@ -81,11 +87,8 @@ class Formiga(object):
         self.DistanciaPercorrida = 0
         self.TourIteracao.append(self.Tour.copy())
 
-        visitas = []
-        for v in self.Visitas:
-            visitas.append(v)
-        self.VisitasIteracao.append(visitas)
-
+        if(self.VisitasIteracao.count(self.Visitas) == 0):
+            self.VisitasIteracao.append(self.Visitas.copy())
         self.PontoAtual = self.PontoInicial
         self.Tour.clear()
         self.Visitas.clear()
@@ -107,7 +110,7 @@ class Formiga(object):
             count += 1
             for a in tour:
                 print("\t\tDe %s até %s. Distância: %.2f. Feromônio: %.2f. Probabilidade: %.2f%%" 
-                % (self.Descricoes[a.PontoOrigem.Tipo][a.PontoOrigem.Valor], self.Descricoes[a.PontoDestino.Tipo][a.PontoDestino.Valor], a.Distancia, a.Feromonio, a.Probabilidade * 100.0))
+                % (self.Descricoes[a.PontoOrigem.Tipo][a.PontoOrigem.Valor], self.Descricoes[a.PontoDestino.Tipo][a.PontoDestino.Valor], a.Distancia, a.Feromonio, a.ProbabilidadeTransicao * 100.0))
                 distancia += a.Distancia
             print("\t\tDistância percorrida: %.2f\n" % (distancia))
     
@@ -120,11 +123,12 @@ class Formiga(object):
         for tour in self.TourIteracao[-1]:
             distancia = 0
             print("\t\t\tDe %s até %s.\0Distância: %.2f. Feromônio: %.2f. Probabilidade: %.2f%%." 
-            % (self.Descricoes[tour.PontoOrigem.Tipo][tour.PontoOrigem.Valor], self.Descricoes[tour.PontoDestino.Tipo][tour.PontoDestino.Valor], tour.Distancia, tour.Feromonio, tour.Probabilidade * 100.0), end=' ')
+            % (self.Descricoes[tour.PontoOrigem.Tipo][tour.PontoOrigem.Valor], self.Descricoes[tour.PontoDestino.Tipo][tour.PontoDestino.Valor], tour.Distancia, tour.Feromonio, tour.ProbabilidadeTransicao * 100.0), end=' ')
             distancia += tour.Distancia
             print("Distância percorrida: %.2f" % (distancia))
 
-    def solucoes(self, top):       
+    def solucoes(self, top): 
+        self.VisitasIteracao.reverse()  
         for visita in self.VisitasIteracao[-top:]:
             print("\t\t[", end='')
             for p in visita:
@@ -136,9 +140,5 @@ class Formiga(object):
         for v in self.VisitasIteracao[-1]:
             print(" %s" % (self.Descricoes[v.Tipo][v.Valor]), end=' \0\t')
         print("\b]\n")
-
-   def atualizarProbabilidadeTransicao(self):
-        for i in range(4):
-            self.probabilidade(i+1)
 
 

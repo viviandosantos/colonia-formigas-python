@@ -15,7 +15,6 @@ class Trilha(object):
         self.DiscXProf = { 1: [1, 2], 2: [3, 4] }
         self.DiasXDisc = { 1: [1,2,5], 2: [1,2,3], 3: [3,5], 4: [4, 5, 6] }
         self.HorariosXDisc = { 1: 1, 2: 2, 3: 2, 4: 1 }
-
         self.RecursosXDisc = { 1: [3,4,5,6], 2: [1,2,3,0], 3: [2,4,0,0], 4: [1,2,5,0] }
         self.RecursosXLabs = { 1: [1, 2, 3, 4], 2: [3, 4, 5, 6], 3: [1, 2, 4, 6] }
        
@@ -101,10 +100,6 @@ class Trilha(object):
         for a in arestasTipo:
             arestasDoPontoInicial = list(filter(lambda x: x.PontoOrigem.Valor == a.PontoOrigem.Valor 
                                                 and x.PontoOrigem.Tipo == a.PontoOrigem.Tipo, arestasTipo))
-            totalInfluencia = 0
-            totalInfluencia = sum(api.Influencia for api in arestasDoPontoInicial)
-            a.Probabilidade = a.Influencia / totalInfluencia
-
             a.ProbabilidadeTransicao = (pow(a.Feromonio, a.Alpha) * pow((1/a.Distancia), a.Beta)) / (sum((pow(api.Feromonio, api.Alpha) * pow((1/api.Distancia), api.Beta)) for api in arestasDoPontoInicial))           
     
     #atualiza o feromonio de todas as arestas
@@ -118,7 +113,6 @@ class Trilha(object):
                 v.print()
                 somaFeromoniosVisitantes += sum(a.AtualizacaoFeromonio / v.DistanciaPercorrida for a in v.Tour)
             a.Feromonio = aposEvaporar + somaFeromoniosVisitantes
-            a.atualizarInfluencia()
 
     #atualiza o feromonio apenas das arestas de um único caminho (o com menor distancia)
     def atualizarFeromonioMenorCaminho(self, caminho):
@@ -131,11 +125,11 @@ class Trilha(object):
                 for v in visitantes:
                     somaFeromoniosVisitantes += sum(c.AtualizacaoFeromonio / v.DistanciaPercorrida for c in v.Tour)
                 aresta.Feromonio = aposEvaporar + somaFeromoniosVisitantes
-                aresta.atualizarInfluencia()
-                #aresta.print()
         for f in self.Formigas:
             f.atualizarArestas(self.Arestas)
             
     def atualizarProbabilidadeTransicao(self):
         for i in range(4):
             self.probabilidade(i+1)
+        for f in self.Formigas:
+            f.atualizarArestas(self.Arestas)

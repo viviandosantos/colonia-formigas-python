@@ -13,17 +13,12 @@ class Aresta(object):
         self.Distancia = distancia
         self.Feromonio = self.ConstFeromonioInicial
         self.Tipo = tipo
-        self.Influencia = pow((1/self.Distancia), self.Alpha) * pow(self.Feromonio, self.Beta)
-        self.Probabilidade = 0 
         self.ProbabilidadeTransicao= 0.0
     
-    def atualizarInfluencia(self):
-        self.Influencia = pow((1/self.Distancia), self.Alpha) * pow(self.Feromonio, self.Beta)
-
     def evaporarFeromonio(self):
         self.FeromonioInicial = (1 - self.CoeficienteEvaporacao) * (1/self.Distancia)
         return self.FeromonioInicial                
 
     def print(self):
         print("Aresta: %d-%d -> %d-%d | Feromonio: %.2f | Influencia: %.2f | Probabilidade: %.2f" 
-        % (self.PontoOrigem.Valor, self.PontoOrigem.Tipo, self.PontoDestino.Valor, self.PontoDestino.Tipo, self.Feromonio, self.Influencia, self.Probabilidade))
+        % (self.PontoOrigem.Valor, self.PontoOrigem.Tipo, self.PontoDestino.Valor, self.PontoDestino.Tipo, self.Feromonio, self.Influencia, self.ProbabilidadeTransicao))

@@ -15,7 +15,7 @@ def menorCaminho(atual, novo):
     return retorno
 
 MAXDIAS, MAXHORARIOS, MAXPROF, MAXDISC, MAXLABS = 6, 2, 2, 4, 3
-QTFORMIGAS, QTPONTOS, QTITERACOES = MAXPROF, 17, 300
+QTFORMIGAS, QTPONTOS, QTITERACOES = MAXPROF, 17, 450
 
 trilha = Trilha()
 trilha.start(MAXDIAS, MAXHORARIOS, MAXPROF, MAXDISC, MAXLABS, QTPONTOS)
@@ -40,10 +40,10 @@ for n in range(QTITERACOES):
     menor.clear()
     print("Iteração", n+1, end=' ')
     for f in trilha.Formigas:
-        trilha.antWalk()
         caminho = f.andar()
         f.printTourAtual()
         menor = menorCaminho(menor, f.TourIteracao[-1])
+        trilha.atualizarProbabilidadeTransicao()
     trilha.atualizarFeromonioMenorCaminho(menor)
 
 print("\nRelatório completo:")
